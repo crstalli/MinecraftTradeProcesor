@@ -10,12 +10,17 @@ const directionMap = {
     5: { x: 1, y: 0, z: 0 }    // East
 };
 
+// Hardcoded recipes
+const recipes = [
+    { input: "minecraft:stick", input_amount: 32, output: "minecraft:emerald", output_amount: 1 },
+    { input: "minecraft:emerald", input_amount: 1, output: "minecraft:stick", output_amount: 32 }
+];
+
 world.beforeEvents.worldInitialize.subscribe((event) => {
     event.blockComponentRegistry.registerCustomComponent("cztl:trade_processor", {
         onTick(e) {
             const block = e.block;
             const container = block.getComponent("minecraft:inventory").container;
-            const recipes = e.component.data.recipes;
             
             // Get the facing direction and calculate target block
             const direction = block.permutation.getState("minecraft:facing_direction");
