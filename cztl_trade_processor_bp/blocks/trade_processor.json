@@ -23,10 +23,6 @@
           "render_method": "alpha_test"
         }
       },
-      "minecraft:inventory": {
-        "container_type": "hopper",
-        "inventory_size": 2
-      },
       "minecraft:tick": {
         "interval_range": [10, 10],
         "looping": true
