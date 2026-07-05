@@ -17,8 +17,11 @@
     "result": {
       "item": "cztl:trade_processor"
     },
-    "unlock_data": {
-      "smoothing_type": "none"
-    }
+    "unlock_data": [
+      {
+        "unlock_type": "crafting_of_block_with_item_drop",
+        "block": "minecraft:hopper"
+      }
+    ]
   }
 }
