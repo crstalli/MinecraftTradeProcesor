@@ -1,33 +1,45 @@
 {
   "format_version": "1.21.0",
-  "minecraft:recipe_shaped": {
+  "minecraft:block": {
     "description": {
-      "identifier": "cztl:trade_hopper_recipe"
+      "identifier": "cztl:trade_processor",
+      "menu_category": {
+        "category": "items",
+        "group": "itemGroup.name.items"
+      }
     },
-    "tags": [
-      "crafting_table"
-    ],
-    "pattern": [
-      "G G",
-      "GCG",
-      " G "
-    ],
-    "key": {
-      "G": {
-        "item": "minecraft:gold_ingot"
+    "components": {
+      "minecraft:geometry": "geometry.trade_processor",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "trade_processor_side",
+          "render_method": "alpha_test"
+        },
+        "up": {
+          "texture": "trade_processor_top",
+          "render_method": "alpha_test"
+        },
+        "down": {
+          "texture": "trade_processor_bottom",
+          "render_method": "alpha_test"
+        }
       },
-      "C": {
-        "item": "minecraft:chest"
-      }
-    },
-    "unlock": [
-      {
-        "item": "minecraft:gold_ingot"
-      }
-    ],
-    "result": {
-      "item": "cztl:trade_processor",
-      "count": 1
+      "minecraft:light_dampening": 0,
+      "minecraft:selection_box": {
+        "origin": [-8, 0, -8],
+        "size": [16, 16, 16]
+      },
+      "minecraft:collision_box": {
+        "origin": [-8, 0, -8],
+        "size": [16, 16, 16]
+      },
+      "minecraft:tick": {
+        "interval_range": [10, 10],
+        "looping": true
+      },
+      "minecraft:custom_components": [
+        "cztl:trade_processor"
+      ]
     }
   }
 }

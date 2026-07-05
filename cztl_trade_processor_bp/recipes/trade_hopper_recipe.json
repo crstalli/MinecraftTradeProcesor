@@ -9,15 +9,15 @@
     ],
     "pattern": [
       "G G",
-      "GCG",
+      "GHG",
       " G "
     ],
     "key": {
       "G": {
         "item": "minecraft:gold_ingot"
       },
-      "C": {
-        "item": "minecraft:chest"
+      "H": {
+        "item": "minecraft:hopper"
       }
     },
     "unlock": [
