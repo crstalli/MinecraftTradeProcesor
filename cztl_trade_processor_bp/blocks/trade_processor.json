@@ -12,15 +12,9 @@
       "minecraft:material_instances": {
         "*": {
           "texture": "trade_processor_side",
-          "render_method": "alpha_test"
-        },
-        "top": {
-          "texture": "trade_processor_top",
-          "render_method": "alpha_test"
-        },
-        "bottom": {
-          "texture": "trade_processor_bottom",
-          "render_method": "alpha_test"
+          "render_method": "alpha_test",
+          "ambient_occlusion": false,
+          "face_dimming": false
         }
       },
       "minecraft:light_dampening": 0,
@@ -31,9 +25,6 @@
       "minecraft:collision_box": {
         "origin": [-8, 0, -8],
         "size": [16, 16, 16]
-      },
-      "minecraft:interact": {
-        "swing": true
       },
       "minecraft:tick": {
         "interval_range": [10, 10],
