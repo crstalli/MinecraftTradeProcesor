@@ -16,39 +16,40 @@ const recipes = [
     { input: "minecraft:emerald", input_amount: 1, output: "minecraft:stick", output_amount: 32 }
 ];
 
+function processTradeBlock(block) {
+    try {
+        const container = block.getComponent("minecraft:inventory")?.container;
+        if (!container) return;
+        
+        // Get the facing direction and calculate target block
+        const direction = block.permutation.getState("minecraft:facing_direction");
+        const offset = directionMap[direction];
+        const targetBlock = block.offset(offset);
+        const outputContainer = targetBlock?.getComponent("minecraft:inventory")?.container;
+
+        if (!outputContainer) return;
+
+        for (let recipe of recipes) {
+            for (let i = 0; i < container.size; i++) {
+                const item = container.getItem(i);
+                
+                if (item && item.typeId === recipe.input && item.amount >= recipe.input_amount) {
+                    item.amount -= recipe.input_amount;
+                    container.setItem(i, item);
+                    outputContainer.addItem(new ItemStack(recipe.output, recipe.output_amount));
+                    return;
+                }
+            }
+        }
+    } catch (error) {
+        console.error(`Error processing trade block: ${error}`);
+    }
+}
+
 world.beforeEvents.worldInitialize.subscribe((event) => {
     event.blockComponentRegistry.registerCustomComponent("cztl:trade_processor", {
         onTick(e) {
-            const block = e.block;
-            const container = block.getComponent("minecraft:inventory").container;
-            
-            // Get the facing direction and calculate target block
-            const direction = block.permutation.getState("minecraft:facing_direction");
-            const offset = directionMap[direction];
-            const targetBlock = block.offset(offset);
-            const outputContainer = targetBlock?.getComponent("minecraft:inventory")?.container;
-
-            // SAFETY CHECK: If no container, do not process
-            if (!outputContainer) return;
-
-            for (let recipe of recipes) {
-                for (let i = 0; i < container.size; i++) {
-                    const item = container.getItem(i);
-                    
-                    // Check if item matches input and meets threshold
-                    if (item && item.typeId === recipe.input && item.amount >= recipe.input_amount) {
-                        
-                        // Consume the input
-                        item.amount -= recipe.input_amount;
-                        container.setItem(i, item);
-                        
-                        // Push the output to the adjacent container
-                        outputContainer.addItem(new ItemStack(recipe.output, recipe.output_amount));
-                        
-                        return; // Process one recipe at a time
-                    }
-                }
-            }
+            processTradeBlock(e.block);
         }
     });
 });
