@@ -1,17 +1,23 @@
 {
-  "format_version": "1.20.50",
+  "format_version": "1.21.0",
   "minecraft:block": {
     "description": {
       "identifier": "cztl:trade_processor",
       "register_to_creative_menu": true
     },
     "components": {
-      "minecraft:material_instances": {
-        "default": {
-          "texture": "hopper_inside"
-        }
-      }
-    },
-    "minecraft:custom_components": ["cztl:trade_processor"]
+      "minecraft:geometry": "minecraft:geometry.hopper",
+      "minecraft:inventory": {
+        "container_type": "hopper",
+        "size": 2
+      },
+      "minecraft:ticking": {
+        "looping": true,
+        "range": [10, 10]
+      },
+      "minecraft:custom_components": [
+        "cztl:trade_processor"
+      ]
+    }
   }
 }
