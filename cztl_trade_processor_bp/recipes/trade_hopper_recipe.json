@@ -11,12 +11,8 @@
       " G "
     ],
     "key": {
-      "G": {
-        "item": "minecraft:gold_ingot"
-      },
-      "H": {
-        "item": "minecraft:hopper"
-      }
+      "G": { "item": "minecraft:gold_ingot" },
+      "H": { "item": "minecraft:hopper" }
     },
     "unlock": [
       {
