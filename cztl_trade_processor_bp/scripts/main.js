@@ -1,159 +1,129 @@
-/*import { world } from "@minecraft/server";
+import { world } from "@minecraft/server";
+import { ActionFormData } from "@minecraft/server-ui";
 
-const tradeTable = [
+// Define your trade registry via an array of objects
+const TRADE_REGISTRY = [
     {
-        input_id: "minecraft:gold_ingot",
-        input_cost: 3,
-        output_id: "minecraft:emerald",
-        output_amount: 1
+        input: "minecraft:gold_ingot",
+        cost: 3,
+        output: "minecraft:emerald",
+        reward: 1,
+        displayName: "Gold Ingot"
     },
     {
-        input_id: "minecraft:iron_ingot",
-        input_cost: 4,
-        output_id: "minecraft:emerald",
-        output_amount: 1
+        input: "minecraft:iron_ingot",
+        cost: 4,
+        output: "minecraft:emerald",
+        reward: 1,
+        displayName: "Iron Ingot"
     },
     {
-        input_id: "minecraft:diamond",
-        input_cost: 1,
-        output_id: "minecraft:emerald",
-        output_amount: 2
+        input: "minecraft:diamond",
+        cost: 1,
+        output: "minecraft:emerald",
+        reward: 2,
+        displayName: "Diamond"
     }
 ];
 
-function getBlockStorage(block) {
-    const key = `cztl_tp_${block.dimension.id}_${block.location.x}_${block.location.y}_${block.location.z}`;
-    const rawData = world.getDynamicProperty(key);
-    return rawData ? JSON.parse(rawData) : {
-        slot_0: { id: "minecraft:air", count: 0 },
-        slot_1: { id: "minecraft:air", count: 0 }
-    };
-}
-
-function saveBlockStorage(block, data) {
-    const key = `cztl_tp_${block.dimension.id}_${block.location.x}_${block.location.y}_${block.location.z}`;
-    world.setDynamicProperty(key, JSON.stringify(data));
-}
-
-world.beforeEvents.worldInitialize.subscribe((event) => {
-    event.blockComponentRegistry.registerCustomComponent("cztl:trade_processor", {
-        onPlace(e) {
-            const block = e.block;
-            saveBlockStorage(block, {
-                slot_0: { id: "minecraft:air", count: 0 },
-                slot_1: { id: "minecraft:air", count: 0 }
-            });
-        },
-
-        onInteract(e) {
-            const { block, player } = e;
-            if (!block || !player) return;
-
-            let storage = getBlockStorage(block);
-            const playerEquip = player.getComponent("minecraft:equippable");
-            const heldItem = playerEquip?.getEquipment("Mainhand");
-
-            // If player interacts with an empty hand, show them what's inside the processor slots
-            if (!heldItem) {
-                player.sendMessage(`\n§b--- Trade Processor Status ---§r\nInput Slot (0): ${storage.slot_0.count}x ${storage.slot_0.id}\nOutput Slot (1): ${storage.slot_1.count}x ${storage.slot_1.id}\n§b----------------------------§r`);
-                return;
-            }
-
-            // If player clicks with an item, try to insert it into Slot 0 if it's on the trade table
-            const isValidTradeItem = tradeTable.some(t => t.input_id === heldItem.typeId);
+world.beforeEvents.worldInitialize.subscribe((initEvent) => {
+    initEvent.blockComponentRegistry.registerCustomComponent("cztl:trade_processor", {
+        onPlayerInteract(event) {
+            const { player } = event;
             
-            if (isValidTradeItem) {
-                if (storage.slot_0.id === "minecraft:air" || storage.slot_0.id === heldItem.typeId) {
-                    const currentCount = storage.slot_0.id === "minecraft:air" ? 0 : storage.slot_0.count;
-                    
-                    if (currentCount + 1 <= 64) {
-                        storage.slot_0.id = heldItem.typeId;
-                        storage.slot_0.count = currentCount + 1;
-                        
-                        // Deduct item from player inventory hand
-                        if (heldItem.amount > 1) {
-                            heldItem.amount -= 1;
-                            playerEquip.setEquipment("Mainhand", heldItem);
-                        } else {
-                            playerEquip.setEquipment("Mainhand", undefined);
-                        }
+            const inventory = player.getComponent("minecraft:inventory")?.container;
+            if (!inventory) return;
 
-                        saveBlockStorage(block, storage);
-                        player.onScreenDisplay.setActionBar(`§aDeposited 1x ${heldItem.typeId} into Input Slot.§r`);
+            // 1. Build a list of available trades based on what is currently in the player's inventory
+            let validTrades = [];
+
+            for (const trade of TRADE_REGISTRY) {
+                let totalInputItems = 0;
+                
+                // Count total items matching this specific trade input
+                for (let i = 0; i < inventory.size; i++) {
+                    const item = inventory.getItem(i);
+                    if (item && item.typeId === trade.input) {
+                        totalInputItems += item.amount;
                     }
                 }
-            } else if (heldItem.typeId === "minecraft:air" && storage.slot_1.count > 0) {
-                // Quick feature: if they interact with a tool or empty container action, pull items from output slot
-                player.onScreenDisplay.setActionBar(`§eOutput container holds uncollected trade balances.§r`);
-            }
-        },
-        
-        onTick(e) {
-            const block = e.block;
-            if (!block) return;
-            
-            let storage = getBlockStorage(block);
-            let slot0 = storage.slot_0;
-            let slot1 = storage.slot_1;
 
-            if (slot0.id === "minecraft:air" || slot0.count <= 0) return;
-
-            const trade = tradeTable.find(t => t.input_id === slot0.id);
-            if (!trade) return;
-
-            if (slot0.count >= trade.input_cost) {
-                if (slot1.id === "minecraft:air" || (slot1.id === trade.output_id && slot1.count + trade.output_amount <= 64)) {
-                    
-                    slot0.count -= trade.input_cost;
-                    if (slot0.count === 0) slot0.id = "minecraft:air";
-
-                    slot1.id = trade.output_id;
-                    slot1.count += trade.output_amount;
-
-                    storage.slot_0 = slot0;
-                    storage.slot_1 = slot1;
-                    saveBlockStorage(block, storage);
+                // If they have enough to do at least 1 trade, calculate it
+                const possibleTrades = Math.floor(totalInputItems / trade.cost);
+                if (possibleTrades > 0) {
+                    validTrades.push({
+                        ...trade,
+                        possibleTrades: possibleTrades,
+                        totalCost: possibleTrades * trade.cost,
+                        totalReward: possibleTrades * trade.reward
+                    });
                 }
             }
-        }
-    });
-});*/
 
-import { world } from "@minecraft/server";
+            // 2. Build the dynamic Action Form UI
+            const form = new ActionFormData().title("Trade Processor");
 
-world.beforeEvents.worldInitialize.subscribe((initEvent) => {
-    // This registration string MUST match the block JSON custom_components array exactly
-    initEvent.blockComponentRegistry.registerCustomComponent("cztl:trade_processor", {
-        
-        // This method handles the right-click event natively
-        onPlayerInteract(event) {
-            const { block, player } = event;
-            
-            // Send a quick test chat to confirm the click is working
-           
-            
-            // Your trading logic goes here...
-        }
-    });
-});
-import { world, Container } from "@minecraft/server";
-
-world.beforeEvents.worldInitialize.subscribe((initEvent) => {
-    initEvent.blockComponentRegistry.registerCustomComponent("cztl:trade_processor", {
-        
-        onPlayerInteract(event) {
-            const { block, player } = event;
-            
-            // Get the block's internal inventory component container
-            const inventoryComponent = block.getComponent("minecraft:inventory");
-             player.sendMessage("§a[Trade Processor] Right-click detected successfully!");
-            if (inventoryComponent && inventoryComponent.container) {
-                // Force the player's screen to open the block's container view
-                player.getComponent("minecraft:inventory")?.container; 
-                 player.sendMessage("§a[Trade Processor] COntainer detected successfully!");
-                // Native command execution to reliably display container screens for custom blocks
-                player.runCommandAsync(`container open ${block.location.x} ${block.location.y} ${block.location.z}`);
+            if (validTrades.length === 0) {
+                form.body("Your inventory does not contain any valid trading materials.\n\nRequired:\n- 3x Gold Ingot -> 1x Emerald\n- 4x Iron Ingot -> 1x Emerald\n- 1x Diamond -> 2x Emeralds");
+                form.button("Close", "textures/ui/cross_out");
+            } else {
+                form.body("Select a valid processing route from your inventory below:");
+                for (const trade of validTrades) {
+                    form.button(`Process ${trade.totalCost}x ${trade.displayName}\n[+${trade.totalReward} Emeralds]`, "textures/ui/checkbox");
+                }
             }
+
+            // 3. Handle the form selection response
+            form.show(player).then((response) => {
+                if (response.canceled || validTrades.length === 0) return;
+
+                const selectedTrade = validTrades[response.selection];
+                let remainingCost = selectedTrade.totalCost;
+
+                // Deduct input costs from player inventory slots
+                for (let i = 0; i < inventory.size; i++) {
+                    if (remainingCost <= 0) break;
+                    const item = inventory.getItem(i);
+                    
+                    if (item && item.typeId === selectedTrade.input) {
+                        if (item.amount <= remainingCost) {
+                            remainingCost -= item.amount;
+                            inventory.setItem(i, undefined);
+                        } else {
+                            item.amount -= remainingCost;
+                            inventory.setItem(i, item);
+                            remainingCost = 0;
+                        }
+                    }
+                }
+
+                // Deliver output rewards
+                player.runCommandAsync(`give @s ${selectedTrade.output} ${selectedTrade.totalReward}`);
+                player.sendMessage(`§a[Trade Processor] Successfully processed ${selectedTrade.possibleTrades} trades for ${selectedTrade.displayName}!`);
+            });
         }
     });
 });
+
+
+// import { world, Container } from "@minecraft/server";
+
+// world.beforeEvents.worldInitialize.subscribe((initEvent) => {
+//     initEvent.blockComponentRegistry.registerCustomComponent("cztl:trade_processor", {
+        
+//         onPlayerInteract(event) {
+//             const { block, player } = event;
+            
+//             // Get the block's internal inventory component container
+//             const inventoryComponent = block.getComponent("minecraft:inventory");
+//              player.sendMessage("§a[Trade Processor] Right-click detected successfully!");
+//             if (inventoryComponent && inventoryComponent.container) {
+//                 // Force the player's screen to open the block's container view
+//                 player.getComponent("minecraft:inventory")?.container; 
+//                  player.sendMessage("§a[Trade Processor] COntainer detected successfully!");
+//                 // Native command execution to reliably display container screens for custom blocks
+//                 player.runCommandAsync(`container open ${block.location.x} ${block.location.y} ${block.location.z}`);
+//             }
+//         }
+//     });
+// });
