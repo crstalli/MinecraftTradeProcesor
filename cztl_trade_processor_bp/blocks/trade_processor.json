@@ -6,7 +6,11 @@
       "register_to_creative_menu": true
     },
     "components": {
-      "minecraft:geometry": "minecraft:geometry.hopper"
+      "minecraft:material_instances": {
+        "default": {
+          "texture": "hopper_inside"
+        }
+      }
     },
     "minecraft:custom_components": ["cztl:trade_processor"]
   }
