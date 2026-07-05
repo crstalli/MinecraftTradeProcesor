@@ -8,13 +8,13 @@
       "crafting_table"
     ],
     "pattern": [
-      "I I",
-      "ICI",
-      " I "
+      "G G",
+      "GCG",
+      " G "
     ],
     "key": {
-      "I": {
-        "item": "minecraft:iron_ingot"
+      "G": {
+        "item": "minecraft:gold_ingot"
       },
       "C": {
         "item": "minecraft:chest"
@@ -22,7 +22,7 @@
     },
     "unlock": [
       {
-        "item": "minecraft:iron_ingot"
+        "item": "minecraft:gold_ingot"
       }
     ],
     "result": {
