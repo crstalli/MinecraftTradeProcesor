@@ -22,10 +22,6 @@
         "origin": [-8, 0, -8],
         "size": [16, 16, 16]
       },
-      "minecraft:aim_collision": {
-        "origin": [-8, 0, -8],
-        "size": [16, 16, 16]
-      },
       "minecraft:collision_box": {
         "origin": [-8, 0, -8],
         "size": [16, 16, 16]
