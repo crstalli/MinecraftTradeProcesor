@@ -1,5 +1,5 @@
 {
-  "format_version": "1.21.0",
+  "format_version": "1.20.0",
   "minecraft:block": {
     "description": {
       "identifier": "cztl:trade_processor",
@@ -7,9 +7,14 @@
     },
     "components": {
       "minecraft:geometry": "minecraft:geometry.hopper",
+      "minecraft:ticking": {
+        "looping": true,
+        "range": [10, 10]
+      },
       "minecraft:inventory": {
         "container_type": "hopper",
-        "size": 2
+        "inventory_size": 2,
+        "can_be_siphoned_from": true
       }
     }
   }
