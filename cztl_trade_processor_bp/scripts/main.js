@@ -1,7 +1,7 @@
 import { world, ItemStack } from "@minecraft/server";
 
 world.beforeEvents.worldInitialize.subscribe((event) => {
-    event.blockComponentRegistry.registerCustomComponent("cztl:auto_processor", {
+    event.blockComponentRegistry.registerCustomComponent("cztl:trade_processor", {
         onTick(e) {
             const block = e.block;
             const container = block.getComponent("minecraft:inventory").container;
