@@ -6,12 +6,8 @@
       "register_to_creative_menu": true
     },
     "components": {
-      "minecraft:geometry": "minecraft:geometry.hopper",
-      "minecraft:inventory": {
-        "container_size": 2,
-        "can_be_siphoned_from": true
-      },
-      "minecraft:tick_world": {}
-    }
+      "minecraft:geometry": "minecraft:geometry.hopper"
+    },
+    "minecraft:custom_components": ["cztl:trade_processor"]
   }
 }
