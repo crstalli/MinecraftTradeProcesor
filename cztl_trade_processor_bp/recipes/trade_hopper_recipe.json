@@ -1,26 +1,28 @@
 {
-  "format_version": "1.20.50",
+  "format_version": "1.21.0",
   "minecraft:recipe_shaped": {
     "description": {
       "identifier": "cztl:trade_hopper_recipe"
     },
-    "tags": ["crafting_table"],
+    "tags": [
+      "crafting_table"
+    ],
     "pattern": [
-      " G ",
-      "GHG",
-      " G "
+      "I I",
+      "ICI",
+      " I "
     ],
     "key": {
-      "G": { "item": "minecraft:gold_ingot" },
-      "H": { "item": "minecraft:hopper" }
-    },
-    "unlock": [
-      {
-        "item": "minecraft:hopper"
+      "I": {
+        "item": "minecraft:iron_ingot"
+      },
+      "C": {
+        "item": "minecraft:chest"
       }
-    ],
+    },
     "result": {
-      "item": "cztl:trade_processor"
+      "item": "cztl:trade_processor",
+      "count": 1
     }
   }
 }
