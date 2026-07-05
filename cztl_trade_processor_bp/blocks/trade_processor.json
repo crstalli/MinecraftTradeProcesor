@@ -9,20 +9,6 @@
       "minecraft:geometry": {
         "identifier": "minecraft:geometry.hopper"
       },
-      "minecraft:material_instances": {
-        "*": {
-          "texture": "trade_processor_side",
-          "render_method": "alpha_test"
-        },
-        "top": {
-          "texture": "trade_processor_top",
-          "render_method": "alpha_test"
-        },
-        "bottom": {
-          "texture": "trade_processor_bottom",
-          "render_method": "alpha_test"
-        }
-      },
       "minecraft:tick": {
         "interval_range": [10, 10],
         "looping": true
