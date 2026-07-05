@@ -1,16 +1,26 @@
 import { world, ItemStack } from "@minecraft/server";
 
+// Map facing_direction to coordinate offsets
+const directionMap = {
+    0: { x: 0, y: -1, z: 0 },  // Down
+    1: { x: 0, y: 1, z: 0 },   // Up
+    2: { x: 0, y: 0, z: -1 },  // North
+    3: { x: 0, y: 0, z: 1 },   // South
+    4: { x: -1, y: 0, z: 0 },  // West
+    5: { x: 1, y: 0, z: 0 }    // East
+};
+
 world.beforeEvents.worldInitialize.subscribe((event) => {
-    event.blockComponentRegistry.registerCustomComponent("cztl:auto_processor", {
+    event.blockComponentRegistry.registerCustomComponent("cztl:trade_processor", {
         onTick(e) {
             const block = e.block;
             const container = block.getComponent("minecraft:inventory").container;
             const recipes = e.component.data.recipes;
             
-            // Get the block the hopper is pointing into
-            // In Bedrock, you can use the 'facing_direction' permutation to find the target
+            // Get the facing direction and calculate target block
             const direction = block.permutation.getState("minecraft:facing_direction");
-            const targetBlock = block.getBlock(direction); 
+            const offset = directionMap[direction];
+            const targetBlock = block.offset(offset);
             const outputContainer = targetBlock?.getComponent("minecraft:inventory")?.container;
 
             // SAFETY CHECK: If no container, do not process
@@ -20,10 +30,10 @@ world.beforeEvents.worldInitialize.subscribe((event) => {
                 for (let i = 0; i < container.size; i++) {
                     const item = container.getItem(i);
                     
-                    // Check if item matches input and meets threshold (keeping 1 as filter)
-                    if (item && item.typeId === recipe.input && item.amount > recipe.input_amount) {
+                    // Check if item matches input and meets threshold
+                    if (item && item.typeId === recipe.input && item.amount >= recipe.input_amount) {
                         
-                        // Consume the input (leaves 1 behind as a filter)
+                        // Consume the input
                         item.amount -= recipe.input_amount;
                         container.setItem(i, item);
                         
