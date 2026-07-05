@@ -20,6 +20,11 @@
         "item": "minecraft:chest"
       }
     },
+    "unlock": [
+      {
+        "item": "minecraft:iron_ingot"
+      }
+    ],
     "result": {
       "item": "cztl:trade_processor",
       "count": 1
