@@ -10,14 +10,7 @@
       "minecraft:inventory": {
         "container_type": "hopper",
         "size": 2
-      },
-      "minecraft:ticking": {
-        "looping": true,
-        "range": [10, 10]
-      },
-      "minecraft:custom_components": [
-        "cztl:trade_processor"
-      ]
+      }
     }
   }
 }
