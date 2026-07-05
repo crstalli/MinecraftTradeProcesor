@@ -10,7 +10,7 @@
     "trade_processor_side": {
       "textures": "textures/blocks/trade_processor_side"
     },
-    "trade_procecssor_bottom": {
+    "trade_processor_bottom": {
       "textures": "textures/blocks/trade_processor_bottom"
     }
   }
