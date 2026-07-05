@@ -5,19 +5,18 @@
       "identifier": "cztl:trade_hopper_recipe"
     },
     "tags": ["crafting_table"],
-    "unlock": [
-      {
-        "context": "player"
-      }
-    ],
     "pattern": [
       " G ",
       "GHG",
       " G "
     ],
     "key": {
-      "G": { "item": "minecraft:gold_ingot" },
-      "H": { "item": "minecraft:hopper" }
+      "G": {
+        "item": "minecraft:gold_ingot"
+      },
+      "H": {
+        "item": "minecraft:hopper"
+      }
     },
     "result": {
       "item": "cztl:trade_processor"
