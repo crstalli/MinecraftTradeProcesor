@@ -14,11 +14,15 @@
           "texture": "trade_processor_side",
           "render_method": "alpha_test",
           "ambient_occlusion": false,
-          "face_dimming": false
+          "face_dimming": true
         }
       },
       "minecraft:light_dampening": 0,
       "minecraft:selection_box": {
+        "origin": [-8, 0, -8],
+        "size": [16, 16, 16]
+      },
+      "minecraft:aim_collision": {
         "origin": [-8, 0, -8],
         "size": [16, 16, 16]
       },
