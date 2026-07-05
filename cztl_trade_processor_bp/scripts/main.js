@@ -130,9 +130,30 @@ world.beforeEvents.worldInitialize.subscribe((initEvent) => {
             const { block, player } = event;
             
             // Send a quick test chat to confirm the click is working
-            player.sendMessage("§a[Trade Processor] Right-click detected successfully!");
+           
             
             // Your trading logic goes here...
+        }
+    });
+});
+import { world, Container } from "@minecraft/server";
+
+world.beforeEvents.worldInitialize.subscribe((initEvent) => {
+    initEvent.blockComponentRegistry.registerCustomComponent("cztl:trade_processor", {
+        
+        onPlayerInteract(event) {
+            const { block, player } = event;
+            
+            // Get the block's internal inventory component container
+            const inventoryComponent = block.getComponent("minecraft:inventory");
+             player.sendMessage("§a[Trade Processor] Right-click detected successfully!");
+            if (inventoryComponent && inventoryComponent.container) {
+                // Force the player's screen to open the block's container view
+                player.getComponent("minecraft:inventory")?.container; 
+                 player.sendMessage("§a[Trade Processor] COntainer detected successfully!");
+                // Native command execution to reliably display container screens for custom blocks
+                player.runCommandAsync(`container open ${block.location.x} ${block.location.y} ${block.location.z}`);
+            }
         }
     });
 });

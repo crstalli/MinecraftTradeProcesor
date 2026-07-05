@@ -1,14 +1,14 @@
 {
-  "format_version": "1.21.0",
+  "format_version": "1.20.80",
   "minecraft:block": {
     "description": {
-      "identifier": "cztl:trade_processor",
-      "menu_category": {
-        "category": "items",
-        "group": "itemGroup.name.items"
-      }
+      "identifier": "cztl:trade_processor"
     },
     "components": {
+      "minecraft:creative_category": {
+        "category": "items",
+        "group": "itemGroup.name.items"
+      },
       "minecraft:geometry": "geometry.trade_processor",
       "minecraft:material_instances": {
         "*": {
@@ -36,6 +36,11 @@
       "minecraft:tick": {
         "interval_range": [10, 10],
         "looping": true
+      },
+      "minecraft:inventory": {
+        "container_type": "container",
+        "inventory_size": 27,
+        "restricted_to_owner": false
       },
       "minecraft:custom_components": [
         "cztl:trade_processor"
