@@ -1,0 +1,17 @@
+{
+  "resource_pack_name": "trade_processor_rp",
+  "texture_name": "atlas.terrain",
+  "padding": 8,
+  "num_mip_levels": 4,
+  "texture_data": {
+    "trade_processor_top": {
+      "textures": "textures/blocks/trade_processor_top"
+    },
+    "trade_processor_side": {
+      "textures": "textures/blocks/trade_processor_side"
+    },
+    "trade_procecssor_bottom": {
+      "textures": "textures/blocks/trade_processor_bottom"
+    }
+  }
+}

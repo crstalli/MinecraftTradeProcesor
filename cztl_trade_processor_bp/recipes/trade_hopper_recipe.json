@@ -1,0 +1,21 @@
+{
+  "format_version": "1.20.50",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "cztl:trade_hopper_recipe"
+    },
+    "tags": ["crafting_table"],
+    "pattern": [
+      " G ",
+      "GHG",
+      " G "
+    ],
+    "key": {
+      "G": { "item": "minecraft:gold_ingot" },
+      "H": { "item": "minecraft:hopper" }
+    },
+    "result": {
+      "item": "cztl:trade_processor"
+    }
+  }
+}

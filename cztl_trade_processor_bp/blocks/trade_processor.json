@@ -1,0 +1,29 @@
+{
+  "format_version": "1.21.0",
+  "minecraft:block": {
+    "description": {
+      "identifier": "cztl:trade_processor",
+      "register_to_creative_menu": true
+    },
+    "components": {
+      "minecraft:geometry": "minecraft:geometry.hopper",
+      "minecraft:inventory": {
+        "container_type": "hopper",
+        "size": 2
+      },
+      "minecraft:ticking": {
+        "looping": true,
+        "range": [10, 10]
+      },
+      "cztl:trade_processor": {
+        "recipes": [
+          { "input": "minecraft:stick", "input_amount": 32, "output": "minecraft:emerald", "output_amount": 1 },
+          { "input": "minecraft:emerald", "input_amount": 1, "output": "minecraft:stick", "output_amount": 32 }
+        ]
+      },
+      "minecraft:custom_components": [
+        "cztl:trade_processor"
+      ]
+    }
+  }
+}
