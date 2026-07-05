@@ -1,4 +1,4 @@
-import { world } from "@minecraft/server";
+/*import { world } from "@minecraft/server";
 
 const tradeTable = [
     {
@@ -115,6 +115,24 @@ world.beforeEvents.worldInitialize.subscribe((event) => {
                     saveBlockStorage(block, storage);
                 }
             }
+        }
+    });
+});*/
+
+import { world } from "@minecraft/server";
+
+world.beforeEvents.worldInitialize.subscribe((initEvent) => {
+    // This registration string MUST match the block JSON custom_components array exactly
+    initEvent.blockComponentRegistry.registerCustomComponent("cztl:trade_processor", {
+        
+        // This method handles the right-click event natively
+        onPlayerInteract(event) {
+            const { block, player } = event;
+            
+            // Send a quick test chat to confirm the click is working
+            player.sendMessage("§a[Trade Processor] Right-click detected successfully!");
+            
+            // Your trading logic goes here...
         }
     });
 });
