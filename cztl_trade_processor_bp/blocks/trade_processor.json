@@ -7,7 +7,7 @@
     },
     "components": {
       "minecraft:geometry": {
-        "identifier": "minecraft:geometry.hopper"
+        "identifier": "geometry.trade_processor"
       },
       "minecraft:tick": {
         "interval_range": [10, 10],
