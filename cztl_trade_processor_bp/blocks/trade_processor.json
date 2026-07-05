@@ -15,12 +15,6 @@
         "looping": true,
         "range": [10, 10]
       },
-      "cztl:trade_processor": {
-        "recipes": [
-          { "input": "minecraft:stick", "input_amount": 32, "output": "minecraft:emerald", "output_amount": 1 },
-          { "input": "minecraft:emerald", "input_amount": 1, "output": "minecraft:stick", "output_amount": 32 }
-        ]
-      },
       "minecraft:custom_components": [
         "cztl:trade_processor"
       ]
