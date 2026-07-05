@@ -13,7 +13,11 @@
       },
       "minecraft:ticking": {
         "looping": true,
-        "range": [10, 10]
+        "range": [10, 10],
+        "on_tick": {
+          "event": "cztl:trade_processor_tick_event",
+          "target": "self"
+        }
       },
       "minecraft:custom_components": [
         "cztl:trade_processor"
