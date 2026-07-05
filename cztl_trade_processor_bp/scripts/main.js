@@ -21,25 +21,39 @@ const tradeTable = [
     }
 ];
 
+// Helper functions to safely read and write tracking data globally using coordinates
+function getBlockStorage(block) {
+    const key = `cztl_tp_${block.dimension.id}_${block.location.x}_${block.location.y}_${block.location.z}`;
+    const rawData = world.getDynamicProperty(key);
+    return rawData ? JSON.parse(rawData) : {
+        slot_0: { id: "minecraft:air", count: 0 },
+        slot_1: { id: "minecraft:air", count: 0 }
+    };
+}
+
+function saveBlockStorage(block, data) {
+    const key = `cztl_tp_${block.dimension.id}_${block.location.x}_${block.location.y}_${block.location.z}`;
+    world.setDynamicProperty(key, JSON.stringify(data));
+}
+
 world.beforeEvents.worldInitialize.subscribe((event) => {
     event.blockComponentRegistry.registerCustomComponent("cztl:trade_processor", {
         onPlace(e) {
             const block = e.block;
-            block.setDynamicProperty("slot_0", JSON.stringify({ id: "minecraft:air", count: 0 }));
-            block.setDynamicProperty("slot_1", JSON.stringify({ id: "minecraft:air", count: 0 }));
+            saveBlockStorage(block, {
+                slot_0: { id: "minecraft:air", count: 0 },
+                slot_1: { id: "minecraft:air", count: 0 }
+            });
         },
         
         onTick(e) {
             const block = e.block;
             if (!block) return;
             
-            // Read properties safely
-            const rawSlot0 = block.getDynamicProperty("slot_0");
-            const rawSlot1 = block.getDynamicProperty("slot_1");
-
-            // Parse strings safely, handling potential undefined states
-            let slot0 = rawSlot0 ? JSON.parse(rawSlot0) : { id: "minecraft:air", count: 0 };
-            let slot1 = rawSlot1 ? JSON.parse(rawSlot1) : { id: "minecraft:air", count: 0 };
+            // Read tracking data via the working world API wrapper
+            let storage = getBlockStorage(block);
+            let slot0 = storage.slot_0;
+            let slot1 = storage.slot_1;
 
             if (slot0.id === "minecraft:air" || slot0.count <= 0) return;
 
@@ -55,8 +69,10 @@ world.beforeEvents.worldInitialize.subscribe((event) => {
                     slot1.id = trade.output_id;
                     slot1.count += trade.output_amount;
 
-                    block.setDynamicProperty("slot_0", JSON.stringify(slot0));
-                    block.setDynamicProperty("slot_1", JSON.stringify(slot1));
+                    // Commit updates back cleanly
+                    storage.slot_0 = slot0;
+                    storage.slot_1 = slot1;
+                    saveBlockStorage(block, storage);
                 }
             }
         }
