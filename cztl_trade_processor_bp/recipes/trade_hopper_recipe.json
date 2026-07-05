@@ -18,6 +18,11 @@
         "item": "minecraft:hopper"
       }
     },
+    "unlock": [
+      {
+        "item": "minecraft:hopper"
+      }
+    ],
     "result": {
       "item": "cztl:trade_processor"
     }

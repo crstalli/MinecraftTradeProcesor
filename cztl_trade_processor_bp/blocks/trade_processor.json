@@ -23,9 +23,10 @@
           "render_method": "alpha_test"
         }
       },
-      "minecraft:storage_item": {
-        "max_slots": 2,
-        "container_type": "hopper"
+      "minecraft:container": {
+        "container_type": "hopper",
+        "inventory_size": 2,
+        "restrict_to_owner": false
       },
       "minecraft:tick": {
         "interval_range": [10, 10],

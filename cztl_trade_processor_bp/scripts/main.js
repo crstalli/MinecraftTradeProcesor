@@ -20,7 +20,7 @@ world.beforeEvents.worldInitialize.subscribe((event) => {
             const block = e.block;
             // Use storage_item for 1.21+ container management
             const storageComponent = block.getComponent("minecraft:storage_item");
-            const container = storageComponent?.container;
+            const container = block.getComponent("minecraft:inventory")?.container;
             if (!container) return;
             
             // Resolve facing direction to find the target drop-off container
