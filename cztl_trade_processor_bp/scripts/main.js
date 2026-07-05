@@ -30,7 +30,9 @@ world.beforeEvents.worldInitialize.subscribe((event) => {
         },
         
         onTick(e) {
+            // Safely fetch the block instance from the event argument object
             const block = e.block;
+            if (!block) return;
             
             let slot0 = JSON.parse(block.getDynamicProperty("slot_0") || '{"id":"minecraft:air","count":0}');
             let slot1 = JSON.parse(block.getDynamicProperty("slot_1") || '{"id":"minecraft:air","count":0}');
