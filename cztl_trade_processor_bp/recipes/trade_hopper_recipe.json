@@ -16,6 +16,9 @@
     },
     "result": {
       "item": "cztl:trade_processor"
+    },
+    "unlock_data": {
+      "smoothing_type": "none"
     }
   }
 }
