@@ -20,7 +20,7 @@ function processTradeBlock(block) {
     try {
         const container = block.getComponent("minecraft:inventory")?.container;
         if (!container) return;
-        
+
         // Get the facing direction and calculate target block
         const direction = block.permutation.getState("minecraft:facing_direction");
         const offset = directionMap[direction];
@@ -34,10 +34,19 @@ function processTradeBlock(block) {
                 const item = container.getItem(i);
                 
                 if (item && item.typeId === recipe.input && item.amount >= recipe.input_amount) {
-                    item.amount -= recipe.input_amount;
-                    container.setItem(i, item);
+                    const newAmount = item.amount - recipe.input_amount;
+                    
+                    // Cleanly clear the slot if the item is entirely consumed
+                    if (newAmount > 0) {
+                        item.amount = newAmount;
+                        container.setItem(i, item);
+                    } else {
+                        container.setItem(i, undefined);
+                    }
+                    
+                    // Deposit trade output into target container
                     outputContainer.addItem(new ItemStack(recipe.output, recipe.output_amount));
-                    return;
+                    return; // Successfully processed one trade this tick
                 }
             }
         }
