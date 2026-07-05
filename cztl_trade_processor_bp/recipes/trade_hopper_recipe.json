@@ -5,6 +5,11 @@
       "identifier": "cztl:trade_hopper_recipe"
     },
     "tags": ["crafting_table"],
+    "unlock": [
+      {
+        "context": "player"
+      }
+    ],
     "pattern": [
       " G ",
       "GHG",
@@ -16,12 +21,6 @@
     },
     "result": {
       "item": "cztl:trade_processor"
-    },
-    "unlock_data": [
-      {
-        "unlock_type": "crafting_of_block_with_item_drop",
-        "block": "minecraft:hopper"
-      }
-    ]
+    }
   }
 }
