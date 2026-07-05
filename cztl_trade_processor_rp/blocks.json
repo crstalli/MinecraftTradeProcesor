@@ -1,24 +1,11 @@
-[
-  {
-    "format_version": "1.21.0",
-    "minecraft:block": {
-      "description": {
-        "identifier": "cztl:trade_processor"
-      },
-      "components": {
-        "minecraft:material_instances": {
-          "*": {
-            "texture": "trade_processor_side",
-            "render_method": "opaque"
-          },
-          "top": {
-            "texture": "trade_processor_top"
-          },
-          "bottom": {
-            "texture": "trade_processor_bottom"
-          }
-        }
-      }
-    }
+{
+  "format_version": "1.21.0",
+  "cztl:trade_processor": {
+    "textures": {
+      "up": "trade_processor_top",
+      "down": "trade_processor_bottom",
+      "side": "trade_processor_side"
+    },
+    "sound": "metal"
   }
-]
+}
