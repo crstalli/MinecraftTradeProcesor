@@ -4,7 +4,7 @@
     "name": "Trade Hopper System",
     "description": "Custom 2-slot trading processor.",
     "uuid": "8c6a2e4b-7f31-4a1d-9e6c-5b2d9a3f8e71",
-    "version": [1, 0, 0],
+    "version": [1, 0, 1],
     "min_engine_version": [1, 20, 50]
   },
   "modules": [
@@ -18,7 +18,7 @@
       "language": "javascript",
       "uuid": "e5e5f2c2-2b3f-4e4b-9c7a-5d6e7f8a9b0c",
       "entry": "scripts/main.js",
-      "version": [1, 0, 0]
+      "version": [1, 0, 1]
     }
   ],
 "dependencies": [
