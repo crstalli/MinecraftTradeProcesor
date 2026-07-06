@@ -9,6 +9,13 @@
       }
     },
     "components": {
+       "minecraft:destructible_by_mining": {
+        "seconds_to_destroy": 2.5,
+        "destroyed_by": ["pickaxe"]
+      },
+      "minecraft:destructible_by_explosion": {
+        "explosion_resistance": 600.0
+      },
       "minecraft:tick": {
         "interval_range": [16, 16],
         "looping": true
