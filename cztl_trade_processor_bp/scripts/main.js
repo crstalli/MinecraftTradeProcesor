@@ -123,6 +123,7 @@ import { world, ItemStack } from "@minecraft/server";
     "minecraft:quartz_pillar": { cost: 1, reward: 1 },
     "minecraft:chiseled_quartz_block": { cost: 1, reward: 1 },
     "minecraft:quartz_bricks": { cost: 1, reward: 1 },
+    "minecraft:quartz_block": { cost: 1, reward: 1 },
 
     // Terracotta (All Colors)
     "minecraft:terracotta": { cost: 1, reward: 1 },
