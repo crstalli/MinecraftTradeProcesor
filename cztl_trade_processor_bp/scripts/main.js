@@ -1,5 +1,12 @@
 import { world, ItemStack } from "@minecraft/server";
 
+/**
+ * EXCHANGE_RATES defines the ratio for Slot 1 items.
+ * Example: stick = { cost: 32, reward: 1 }
+ * Means:
+ * 32 emeralds → 1 stick
+ * 1 stick → 32 emeralds
+ */
 const EXCHANGE_RATES = {
     // FARMER
     "minecraft:wheat": { cost: 20, reward: 1 },
@@ -110,6 +117,7 @@ const EXCHANGE_RATES = {
     "minecraft:emerald_block": { cost: 63, reward: 1, rewardItem: "minecraft:diamond" }
 };
 
+
 world.beforeEvents.worldInitialize.subscribe(init => {
     init.blockComponentRegistry.registerCustomComponent("cztl:trade_processor", {
         onPlace(ev) {
@@ -121,21 +129,155 @@ world.beforeEvents.worldInitialize.subscribe(init => {
     });
 });
 
+import { world, ItemStack } from "@minecraft/server";
+
+/**
+ * EXCHANGE_RATES defines the ratio for Slot 1 items.
+ * Example: stick = { cost: 32, reward: 1 }
+ * Means:
+ * 32 emeralds → 1 stick
+ * 1 stick → 32 emeralds
+ */
+const EXCHANGE_RATES = {
+    "minecraft:stick": { cost: 32, reward: 1 },
+    "minecraft:gold_ingot": { cost: 3, reward: 1 },
+    "minecraft:iron_ingot": { cost: 4, reward: 1 },
+    "minecraft:diamond": { cost: 1, reward: 1 },
+    "minecraft:emerald_block": { cost: 63, reward: 1, rewardItem: "minecraft:diamond" }
+};
+
+world.beforeEvents.worldInitialize.subscribe(init => {
+    init.blockComponentRegistry.registerCustomComponent("cztl:trade_processor", {
+        onPlace(ev) {
+            ev.block.getComponent("minecraft:tick")?.startTick();
+        },
+        onTick(ev) {
+            processTrade(ev.block);
+        }
+    });
+});
+
+/**
+ * MAIN TRADE LOGIC
+ */
 function processTrade(block) {
-    const input = findInputHopper(block);
-    if (!input) return;
+    const inputHoppers = findInputHoppers(block);
+    if (inputHoppers.length === 0) return;
 
     const output = findOutputHopper(block);
-    if (!output) return; // ⭐ EXIT EARLY — no hopper below
+    if (!output) return;
 
-    const inv = input.getComponent("minecraft:inventory")?.container;
-    if (!inv) return;
-
-    processSlot(inv, inv.getItem(0), 0, output);
-    processSlot(inv, inv.getItem(1), 1, output);
+    // Try each hopper until one succeeds
+    for (const inv of inputHoppers) {
+        if (processTradeForInventory(inv, output)) {
+            return; // stop after first successful trade
+        }
+    }
 }
 
-function findInputHopper(block) {
+/**
+ * Trade logic for a single hopper inventory
+ */
+function processTradeForInventory(inv, output) {
+    const slot1 = inv.getItem(0); // output item
+    const slot2 = inv.getItem(1); // cost item
+    const slot3 = inv.getItem(2); // discount item A
+    const slot4 = inv.getItem(3); // discount item B
+
+    if (!slot1 || !slot2) return false;
+
+    const outputItem = slot1.typeId;
+    const costItem = slot2.typeId;
+
+    const rate = EXCHANGE_RATES[outputItem];
+    if (!rate) return false;
+
+    let costAmount = rate.cost;
+    let rewardAmount = rate.reward;
+    const rewardItem = rate.rewardItem ?? "minecraft:emerald";
+
+    // ⭐ 20% discount if weakness potion + golden apple in ANY order
+    if (isDiscountActive(slot3, slot4)) {
+        costAmount = Math.max(1, Math.floor(costAmount * 0.80));
+    }
+
+    // ⭐ FORWARD TRADE: costItem → outputItem
+    const costStack = findMatchingItem(inv, costItem);
+    if (costStack && costStack.amount >= costAmount + 1) {
+        costStack.amount -= costAmount;
+        inv.setItem(costStack.slot, costStack);
+        output.addItem(new ItemStack(outputItem, rewardAmount));
+        return true;
+    }
+
+    // ⭐ REVERSE TRADE: outputItem → costItem (with hopper fullness check)
+    if (!isOutputHopperFull(output)) {
+        const outputStack = findMatchingItem(inv, outputItem);
+        if (outputStack && outputStack.amount >= rewardAmount + 1) {
+            outputStack.amount -= rewardAmount;
+            inv.setItem(outputStack.slot, outputStack);
+            output.addItem(new ItemStack(costItem, costAmount));
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
+ * Weakness potion + golden apple = discount active
+ * Slot 3 and 4 order DOES NOT matter.
+ */
+function isDiscountActive(a, b) {
+    if (!a || !b) return false;
+
+    const weaknessPotions = [
+        "minecraft:splash_potion",
+        "minecraft:splash_potion:weakness",
+        "minecraft:splash_potion:long_weakness"
+    ];
+
+    const isWeaknessA = weaknessPotions.some(p => a.typeId.startsWith(p));
+    const isWeaknessB = weaknessPotions.some(p => b.typeId.startsWith(p));
+
+    const isAppleA = a.typeId === "minecraft:golden_apple";
+    const isAppleB = b.typeId === "minecraft:golden_apple";
+
+    return (isWeaknessA && isAppleB) || (isWeaknessB && isAppleA);
+}
+
+/**
+ * Prevent hopper overflow by requiring at least 32 free item spaces.
+ */
+function isOutputHopperFull(outputInv) {
+    let freeSpace = 0;
+
+    for (let i = 0; i < outputInv.size; i++) {
+        const item = outputInv.getItem(i);
+        if (!item) freeSpace += 64;
+        else freeSpace += (64 - item.amount);
+    }
+
+    return freeSpace < 32;
+}
+
+/**
+ * Find any item in the hopper matching typeId.
+ */
+function findMatchingItem(inv, typeId) {
+    for (let i = 0; i < inv.size; i++) {
+        const item = inv.getItem(i);
+        if (item && item.typeId === typeId) {
+            return { slot: i, amount: item.amount };
+        }
+    }
+    return null;
+}
+
+/**
+ * Find ALL input hoppers (up to 5)
+ */
+function findInputHoppers(block) {
     const { x, y, z } = block.location;
     const dim = block.dimension;
 
@@ -147,14 +289,22 @@ function findInputHopper(block) {
         { x: 0, y: 0, z: -1 }   // north
     ];
 
+    const hoppers = [];
+
     for (const o of offsets) {
         const b = dim.getBlock({ x: x + o.x, y: y + o.y, z: z + o.z });
-        if (b?.typeId === "minecraft:hopper") return b;
+        if (b?.typeId === "minecraft:hopper") {
+            const inv = b.getComponent("minecraft:inventory")?.container;
+            if (inv) hoppers.push(inv);
+        }
     }
 
-    return null;
+    return hoppers;
 }
 
+/**
+ * Find hopper below the block.
+ */
 function findOutputHopper(block) {
     const { x, y, z } = block.location;
     const dim = block.dimension;
@@ -163,42 +313,4 @@ function findOutputHopper(block) {
     if (b?.typeId !== "minecraft:hopper") return null;
 
     return b.getComponent("minecraft:inventory")?.container ?? null;
-}
-
-function processSlot(inv, item, slotIndex, outputInv) {
-    if (!item) return;
-
-    const type = item.typeId;
-
-    // ⭐ FORWARD TRADE
-    if (EXCHANGE_RATES[type]) {
-        const rate = EXCHANGE_RATES[type];
-        const rewardItem = rate.rewardItem ?? "minecraft:emerald";
-
-        if (item.amount >= rate.cost + 1) {
-            const remaining = item.amount - rate.cost;
-            inv.setItem(slotIndex, new ItemStack(type, remaining)); // leave 1
-            outputInv.addItem(new ItemStack(rewardItem, rate.reward)); // ⭐ send to bottom hopper
-            return;
-        }
-    }
-
-    // ⭐ REVERSE TRADE
-    const rewardTypes = new Set(["minecraft:emerald", "minecraft:diamond", "minecraft:emerald_block"]);
-
-    if (rewardTypes.has(type)) {
-        for (const itemId in EXCHANGE_RATES) {
-            const rate = EXCHANGE_RATES[itemId];
-            const rewardItem = rate.rewardItem ?? "minecraft:emerald";
-
-            if (type !== rewardItem) continue;
-
-            if (item.amount >= rate.reward + 1) {
-                const remaining = item.amount - rate.reward;
-                inv.setItem(slotIndex, new ItemStack(type, remaining)); // leave 1
-                outputInv.addItem(new ItemStack(itemId, rate.cost)); // ⭐ send to bottom hopper
-                return;
-            }
-        }
-    }
 }
