@@ -94,7 +94,7 @@ The processor runs every **16 ticks (0.8 seconds, 1/2 hopper speed)** via:
 "minecraft:tick": {
   "interval_range": [16, 16]
 }
-
+```
 
 This provides:
 
