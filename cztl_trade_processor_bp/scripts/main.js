@@ -226,11 +226,7 @@ import { world, ItemStack } from "@minecraft/server";
     "minecraft:brown_banner": { cost: 3, reward: 1 },
     "minecraft:green_banner": { cost: 3, reward: 1 },
     "minecraft:red_banner": { cost: 3, reward: 1 },
-    "minecraft:blue_banner": { cost: 3, reward: 1 },
-    "minecraft:brown_banner": { cost: 3, reward: 1 },
-    "minecraft:green_banner": { cost: 3, reward: 1 },
-    "minecraft:red_banner": { cost: 3, reward: 1 },
-    "minecraft:black_banner": { cost: 3, reward: 1 },
+
 
     "minecraft:painting": { cost: 2, reward: 1 },
     "minecraft:shears": { cost: 3, reward: 1 },
