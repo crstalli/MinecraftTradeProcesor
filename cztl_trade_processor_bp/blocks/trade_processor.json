@@ -10,7 +10,7 @@
     },
     "components": {
       "minecraft:tick": {
-        "interval_range": [10, 10],
+        "interval_range": [16, 16],
         "looping": true
       },
       "minecraft:custom_components": [

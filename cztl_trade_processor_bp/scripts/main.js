@@ -39,7 +39,6 @@ const EXCHANGE_RATES = {
     "minecraft:raw_beef": { cost: 14, reward: 1 },
     "minecraft:raw_rabbit": { cost: 14, reward: 1 },
     "minecraft:dried_kelp_block": { cost: 10, reward: 1 },
-    "minecraft:sweet_berries": { cost: 10, reward: 1 },
 
     // CLERIC
     "minecraft:rotten_flesh": { cost: 32, reward: 1 },
@@ -51,15 +50,12 @@ const EXCHANGE_RATES = {
     "minecraft:ender_pearl": { cost: 1, reward: 1 },
 
     // ARMORER / TOOLSMITH / WEAPONSMITH
-    "minecraft:coal": { cost: 10, reward: 1 },
     "minecraft:iron_ingot": { cost: 4, reward: 1 },
     "minecraft:diamond": { cost: 1, reward: 1 },
 
     // LEATHERWORKER
     "minecraft:leather": { cost: 6, reward: 1 },
     "minecraft:rabbit_hide": { cost: 6, reward: 1 },
-    "minecraft:flint": { cost: 10, reward: 1 },
-    "minecraft:scute": { cost: 4, reward: 1 },
 
     // CARTOGRAPHER
     "minecraft:paper": { cost: 24, reward: 1 },
@@ -117,35 +113,6 @@ const EXCHANGE_RATES = {
     "minecraft:emerald_block": { cost: 63, reward: 1, rewardItem: "minecraft:diamond" }
 };
 
-
-world.beforeEvents.worldInitialize.subscribe(init => {
-    init.blockComponentRegistry.registerCustomComponent("cztl:trade_processor", {
-        onPlace(ev) {
-            ev.block.getComponent("minecraft:tick")?.startTick();
-        },
-        onTick(ev) {
-            processTrade(ev.block);
-        }
-    });
-});
-
-import { world, ItemStack } from "@minecraft/server";
-
-/**
- * EXCHANGE_RATES defines the ratio for Slot 1 items.
- * Example: stick = { cost: 32, reward: 1 }
- * Means:
- * 32 emeralds → 1 stick
- * 1 stick → 32 emeralds
- */
-const EXCHANGE_RATES = {
-    "minecraft:stick": { cost: 32, reward: 1 },
-    "minecraft:gold_ingot": { cost: 3, reward: 1 },
-    "minecraft:iron_ingot": { cost: 4, reward: 1 },
-    "minecraft:diamond": { cost: 1, reward: 1 },
-    "minecraft:emerald_block": { cost: 63, reward: 1, rewardItem: "minecraft:diamond" }
-};
-
 world.beforeEvents.worldInitialize.subscribe(init => {
     init.blockComponentRegistry.registerCustomComponent("cztl:trade_processor", {
         onPlace(ev) {
@@ -196,14 +163,14 @@ function processTradeForInventory(inv, output) {
     let rewardAmount = rate.reward;
     const rewardItem = rate.rewardItem ?? "minecraft:emerald";
 
-    // ⭐ 20% discount if weakness potion + golden apple in ANY order
+    // ⭐ FIXED: Only weakness potions + golden apple trigger discount
     if (isDiscountActive(slot3, slot4)) {
         costAmount = Math.max(1, Math.floor(costAmount * 0.80));
     }
 
     // ⭐ FORWARD TRADE: costItem → outputItem
     const costStack = findMatchingItem(inv, costItem);
-    if (costStack && costStack.amount >= costAmount + 1) {
+    if (costStack && costStack.amount >= costAmount) {
         costStack.amount -= costAmount;
         inv.setItem(costStack.slot, costStack);
         output.addItem(new ItemStack(outputItem, rewardAmount));
@@ -213,7 +180,7 @@ function processTradeForInventory(inv, output) {
     // ⭐ REVERSE TRADE: outputItem → costItem (with hopper fullness check)
     if (!isOutputHopperFull(output)) {
         const outputStack = findMatchingItem(inv, outputItem);
-        if (outputStack && outputStack.amount >= rewardAmount + 1) {
+        if (outputStack && outputStack.amount >= rewardAmount) {
             outputStack.amount -= rewardAmount;
             inv.setItem(outputStack.slot, outputStack);
             output.addItem(new ItemStack(costItem, costAmount));
@@ -225,25 +192,27 @@ function processTradeForInventory(inv, output) {
 }
 
 /**
- * Weakness potion + golden apple = discount active
+ * FIXED: Weakness potion + golden apple = discount active
  * Slot 3 and 4 order DOES NOT matter.
  */
 function isDiscountActive(a, b) {
     if (!a || !b) return false;
 
-    const weaknessPotions = [
-        "minecraft:splash_potion",
-        "minecraft:splash_potion:weakness",
-        "minecraft:splash_potion:long_weakness"
+    const potionA = a.getComponent("minecraft:potion")?.effectId;
+    const potionB = b.getComponent("minecraft:potion")?.effectId;
+
+    const weaknessEffects = [
+        "weakness",
+        "long_weakness"
     ];
 
-    const isWeaknessA = weaknessPotions.some(p => a.typeId.startsWith(p));
-    const isWeaknessB = weaknessPotions.some(p => b.typeId.startsWith(p));
+    const isWeakA = weaknessEffects.includes(potionA);
+    const isWeakB = weaknessEffects.includes(potionB);
 
     const isAppleA = a.typeId === "minecraft:golden_apple";
     const isAppleB = b.typeId === "minecraft:golden_apple";
 
-    return (isWeaknessA && isAppleB) || (isWeaknessB && isAppleA);
+    return (isWeakA && isAppleB) || (isWeakB && isAppleA);
 }
 
 /**
