@@ -51,6 +51,8 @@ Each input hopper defines **one trade** using its first two slots:
 
 This pair defines the trade ratio using the internal exchange table.
 
+I recommend putting filter items in the remaining slots that aren't used (slot 5 always, 3,4 if you aren't doing zombie discounts).
+
 ### Example
 If Slot 1 = `stick` and Slot 2 = `emerald`:
 
@@ -67,7 +69,7 @@ Each hopper can define a **different trade**, allowing multi‑trade setups.
 
 If **any input hopper** contains:
 
-- A **weakness splash potion** (any variant)  
+- A **FERMENTED SPIDER EYE**
 - A **golden apple**
 
 In **Slot 3 and Slot 4** (order does not matter):
@@ -78,12 +80,8 @@ In **Slot 3 and Slot 4** (order does not matter):
 - Normal: **32 emeralds → 1 stick**  
 - Discounted: **25 emeralds → 1 stick**
 
-Reverse trades also receive the discount:
-
-- Normal: **1 stick → 32 emeralds**  
-- Discounted: **1 stick → 25 emeralds**
-
 Discount items are **not consumed**.
+
 
 ---
 
