@@ -4,8 +4,10 @@ import { world, ItemStack } from "@minecraft/server";
  * EXCHANGE_RATES defines the ratio for Slot 1 items.
  * Example: stick = { cost: 32, reward: 1 }
  * Means:
- * 32 emeralds → 1 stick
- * 1 stick → 32 emeralds
+ * 32 sticks → 1 emerald
+ * 1 emerald → 32 sticks
+ *
+ * NOTE: This table is keyed by the cost item (what the player gives).
  */
 const EXCHANGE_RATES = {
     // FARMER
@@ -144,17 +146,25 @@ function processTrade(block) {
 
 /**
  * Trade logic for a single hopper inventory
+ *
+ * Behavior:
+ * - Slots 0 and 1 are configuration slots (placeholders). A single item (amount === 1) in a config slot is treated as a placeholder and will NOT be consumed.
+ * - If a config slot contains more than 1 item, the extra items are available for consumption (so 64 sticks in slot 0 will be used).
+ * - Slots 2 and 3 are discount slots and are never consumed as input.
+ * - EXCHANGE_RATES is keyed by the cost item (what the player gives).
+ * - A trade only executes if:
+ *     * the required cost amount exists in the input area (slots excluding discount slots; config slots count only if amount > 1), AND
+ *     * there is at least one extra emerald present in the input area (excluding config and discount slots) — this is the "second emerald" requirement.
  */
 function processTradeForInventory(inv, output) {
-    const slotA = inv.getItem(0); // one side
-    const slotB = inv.getItem(1); // other side
-    const slot3 = inv.getItem(2); // discount A
+    const slotA = inv.getItem(0); // config slot A
+    const slotB = inv.getItem(1); // config slot B
+    const slot3 = inv.getItem(2); // discount A (potion/apple)
     const slot4 = inv.getItem(3); // discount B
 
     if (!slotA || !slotB) return false;
 
-    // Determine which slot is the cost item by checking EXCHANGE_RATES keys.
-    // Prefer cost-keyed EXCHANGE_RATES (so "minecraft:stick": { cost: 32, reward: 1 } means 32 sticks -> reward)
+    // Determine which config slot is the cost item by checking EXCHANGE_RATES keys.
     let costItem, outputItem, rate;
     if (EXCHANGE_RATES[slotA.typeId]) {
         costItem = slotA.typeId;
@@ -165,37 +175,44 @@ function processTradeForInventory(inv, output) {
         outputItem = slotA.typeId;
         rate = EXCHANGE_RATES[costItem];
     } else {
-        // No matching rate found in either slot
+        // No matching rate found in either config slot
         return false;
     }
 
+    // Base amounts from the rate
     let costAmount = rate.cost;
     let rewardAmount = rate.reward;
-    // rewardItem: explicit override in table, otherwise fall back to the other slot (outputItem)
-    const rewardItem = rate.rewardItem ?? outputItem;
+    const rewardItem = rate.rewardItem ?? "minecraft:emerald";
 
-    // Discount check (unchanged)
+    let discountedCostAmount = costAmount;
     if (isDiscountActive(slot3, slot4)) {
-        costAmount = Math.max(1, Math.floor(costAmount * 0.80));
+        discountedCostAmount = Math.max(1, Math.floor(costAmount * 0.80));
     }
 
-    // Ensure output hopper has space before adding (keeps your existing behavior)
+    // Define which slots are protected (config placeholders and discount slots)
+    const CONFIG_SLOTS = [0, 1];
+    const DISCOUNT_SLOTS = [2, 3];
+    const EXCLUDE_FOR_EXTRA_EMERALD = CONFIG_SLOTS.concat(DISCOUNT_SLOTS); // exclude 0-3 when searching for the "second emerald"
+
+
+    // Ensure output hopper has space before adding
     if (!isOutputHopperFull(output)) {
         // FORWARD: player gives costItem -> processor gives rewardItem
-        const costMatch = findMatchingItem(inv, costItem);
-        if (costMatch && costMatch.stack.amount >= costAmount) {
-            const remaining = costMatch.stack.amount - costAmount;
+        const costMatch = findMatchingItem(inv, costItem, DISCOUNT_SLOTS, true);
+        if (costMatch && costMatch.stack.amount >= discountedCostAmount) {
+            const remaining = costMatch.stack.amount - discountedCostAmount;
             if (remaining > 0) {
                 inv.setItem(costMatch.slot, new ItemStack(costMatch.stack.typeId, remaining));
             } else {
                 inv.setItem(costMatch.slot, undefined);
             }
+
             output.addItem(new ItemStack(rewardItem, rewardAmount));
             return true;
         }
 
-        // REVERSE: player gives rewardItem -> processor gives costItem
-        const outMatch = findMatchingItem(inv, rewardItem);
+        // REVERSE: player gives rewardItem -> processor gives costItem into output hopper
+        const outMatch = findMatchingItem(inv, rewardItem, DISCOUNT_SLOTS, /*allowConfigIfAmountGT1=*/ true);
         if (outMatch && outMatch.stack.amount >= rewardAmount) {
             const remainingOut = outMatch.stack.amount - rewardAmount;
             if (remainingOut > 0) {
@@ -211,6 +228,7 @@ function processTradeForInventory(inv, output) {
     return false;
 }
 
+
 /**
  * FIXED: Weakness potion + golden apple = discount active
  * Slot 3 and 4 order DOES NOT matter.
@@ -222,7 +240,9 @@ function isDiscountActive(a, b) {
     const potionB = b.getComponent("minecraft:potion")?.effectId;
 
     const weaknessEffects = [
+        "minecraft:weakness",
         "weakness",
+        "minecraft:long_weakness",
         "long_weakness"
     ];
 
@@ -253,16 +273,35 @@ function isOutputHopperFull(outputInv) {
 /**
  * Find any item in the hopper matching typeId.
  * Returns { slot, stack } where stack is the actual ItemStack instance.
+ * excludeSlots: array of slot indices to ignore (e.g., [2,3] to ignore discount slots).
+ * allowConfigIfAmountGT1: when true, config slots (0 and 1) are allowed as matches only if their amount > 1.
  */
-function findMatchingItem(inv, typeId) {
+function findMatchingItem(inv, typeId, excludeSlots = [], allowConfigIfAmountGT1 = false) {
+    const CONFIG_SLOTS = [0, 1];
+
     for (let i = 0; i < inv.size; i++) {
+        if (excludeSlots.includes(i)) continue;
+
         const item = inv.getItem(i);
-        if (item && item.typeId === typeId) {
-            return { slot: i, stack: item };
+        if (!item) continue;
+
+        if (item.typeId !== typeId) continue;
+
+        // If this is a config slot and allowConfigIfAmountGT1 is false, treat a single-item stack as protected placeholder
+        if (CONFIG_SLOTS.includes(i) && !allowConfigIfAmountGT1) {
+            if (item.amount <= 1) {
+                // skip this slot (it's a placeholder)
+                continue;
+            }
+            // if amount > 1 and allowConfigIfAmountGT1 is true, fall through and allow consumption
         }
+
+        // If we reach here, this slot is a valid match
+        return { slot: i, stack: item };
     }
     return null;
 }
+
 
 /**
  * Find ALL input hoppers (up to 5)
