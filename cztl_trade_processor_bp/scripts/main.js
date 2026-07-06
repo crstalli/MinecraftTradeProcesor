@@ -146,43 +146,63 @@ function processTrade(block) {
  * Trade logic for a single hopper inventory
  */
 function processTradeForInventory(inv, output) {
-    const slot1 = inv.getItem(0); // output item
-    const slot2 = inv.getItem(1); // cost item
-    const slot3 = inv.getItem(2); // discount item A
-    const slot4 = inv.getItem(3); // discount item B
+    const slotA = inv.getItem(0); // one side
+    const slotB = inv.getItem(1); // other side
+    const slot3 = inv.getItem(2); // discount A
+    const slot4 = inv.getItem(3); // discount B
 
-    if (!slot1 || !slot2) return false;
+    if (!slotA || !slotB) return false;
 
-    const outputItem = slot1.typeId;
-    const costItem = slot2.typeId;
-
-    const rate = EXCHANGE_RATES[outputItem];
-    if (!rate) return false;
+    // Determine which slot is the cost item by checking EXCHANGE_RATES keys.
+    // Prefer cost-keyed EXCHANGE_RATES (so "minecraft:stick": { cost: 32, reward: 1 } means 32 sticks -> reward)
+    let costItem, outputItem, rate;
+    if (EXCHANGE_RATES[slotA.typeId]) {
+        costItem = slotA.typeId;
+        outputItem = slotB.typeId;
+        rate = EXCHANGE_RATES[costItem];
+    } else if (EXCHANGE_RATES[slotB.typeId]) {
+        costItem = slotB.typeId;
+        outputItem = slotA.typeId;
+        rate = EXCHANGE_RATES[costItem];
+    } else {
+        // No matching rate found in either slot
+        return false;
+    }
 
     let costAmount = rate.cost;
     let rewardAmount = rate.reward;
-    const rewardItem = rate.rewardItem ?? "minecraft:emerald";
+    // rewardItem: explicit override in table, otherwise fall back to the other slot (outputItem)
+    const rewardItem = rate.rewardItem ?? outputItem;
 
-    // ⭐ FIXED: Only weakness potions + golden apple trigger discount
+    // Discount check (unchanged)
     if (isDiscountActive(slot3, slot4)) {
         costAmount = Math.max(1, Math.floor(costAmount * 0.80));
     }
 
-    // ⭐ FORWARD TRADE: costItem → outputItem
-    const costStack = findMatchingItem(inv, costItem);
-    if (costStack && costStack.amount >= costAmount) {
-        costStack.amount -= costAmount;
-        inv.setItem(costStack.slot, costStack);
-        output.addItem(new ItemStack(outputItem, rewardAmount));
-        return true;
-    }
-
-    // ⭐ REVERSE TRADE: outputItem → costItem (with hopper fullness check)
+    // Ensure output hopper has space before adding (keeps your existing behavior)
     if (!isOutputHopperFull(output)) {
-        const outputStack = findMatchingItem(inv, outputItem);
-        if (outputStack && outputStack.amount >= rewardAmount) {
-            outputStack.amount -= rewardAmount;
-            inv.setItem(outputStack.slot, outputStack);
+        // FORWARD: player gives costItem -> processor gives rewardItem
+        const costMatch = findMatchingItem(inv, costItem);
+        if (costMatch && costMatch.stack.amount >= costAmount) {
+            const remaining = costMatch.stack.amount - costAmount;
+            if (remaining > 0) {
+                inv.setItem(costMatch.slot, new ItemStack(costMatch.stack.typeId, remaining));
+            } else {
+                inv.setItem(costMatch.slot, undefined);
+            }
+            output.addItem(new ItemStack(rewardItem, rewardAmount));
+            return true;
+        }
+
+        // REVERSE: player gives rewardItem -> processor gives costItem
+        const outMatch = findMatchingItem(inv, rewardItem);
+        if (outMatch && outMatch.stack.amount >= rewardAmount) {
+            const remainingOut = outMatch.stack.amount - rewardAmount;
+            if (remainingOut > 0) {
+                inv.setItem(outMatch.slot, new ItemStack(outMatch.stack.typeId, remainingOut));
+            } else {
+                inv.setItem(outMatch.slot, undefined);
+            }
             output.addItem(new ItemStack(costItem, costAmount));
             return true;
         }
@@ -232,12 +252,13 @@ function isOutputHopperFull(outputInv) {
 
 /**
  * Find any item in the hopper matching typeId.
+ * Returns { slot, stack } where stack is the actual ItemStack instance.
  */
 function findMatchingItem(inv, typeId) {
     for (let i = 0; i < inv.size; i++) {
         const item = inv.getItem(i);
         if (item && item.typeId === typeId) {
-            return { slot: i, amount: item.amount };
+            return { slot: i, stack: item };
         }
     }
     return null;
