@@ -9,30 +9,9 @@
       }
     },
     "components": {
-      "minecraft:geometry": {
-        "identifier": "geometry.trade_processor"
-      },
-      "minecraft:material_instances": {
-        "*": {
-          "texture": "trade_processor_side",
-          "render_method": "alpha_test"
-        },
-        "up": {
-          "texture": "trade_processor_top",
-          "render_method": "alpha_test"
-        },
-        "down": {
-          "texture": "trade_processor_bottom",
-          "render_method": "alpha_test"
-        }
-      },
-      "minecraft:selection_box": {
-        "origin": [-8, 0, -8],
-        "size": [16, 16, 16]
-      },
-      "minecraft:collision_box": {
-        "origin": [-8, 0, -8],
-        "size": [16, 16, 16]
+      "minecraft:tick": {
+        "interval_range": [10, 10],
+        "looping": true
       },
       "minecraft:custom_components": [
         "cztl:trade_processor"

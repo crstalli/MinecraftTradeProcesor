@@ -1,129 +1,204 @@
-import { world } from "@minecraft/server";
-import { ActionFormData } from "@minecraft/server-ui";
+import { world, ItemStack } from "@minecraft/server";
 
-// Define your trade registry via an array of objects
-const TRADE_REGISTRY = [
-    {
-        input: "minecraft:gold_ingot",
-        cost: 3,
-        output: "minecraft:emerald",
-        reward: 1,
-        displayName: "Gold Ingot"
-    },
-    {
-        input: "minecraft:iron_ingot",
-        cost: 4,
-        output: "minecraft:emerald",
-        reward: 1,
-        displayName: "Iron Ingot"
-    },
-    {
-        input: "minecraft:diamond",
-        cost: 1,
-        output: "minecraft:emerald",
-        reward: 2,
-        displayName: "Diamond"
-    }
-];
+const EXCHANGE_RATES = {
+    // FARMER
+    "minecraft:wheat": { cost: 20, reward: 1 },
+    "minecraft:potato": { cost: 15, reward: 1 },
+    "minecraft:carrot": { cost: 15, reward: 1 },
+    "minecraft:beetroot": { cost: 15, reward: 1 },
+    "minecraft:pumpkin": { cost: 6, reward: 1 },
+    "minecraft:melon_slice": { cost: 4, reward: 1 },
+    "minecraft:sweet_berries": { cost: 10, reward: 1 },
+    "minecraft:nether_wart": { cost: 12, reward: 1 },
 
-world.beforeEvents.worldInitialize.subscribe((initEvent) => {
-    initEvent.blockComponentRegistry.registerCustomComponent("cztl:trade_processor", {
-        onPlayerInteract(event) {
-            const { player } = event;
-            
-            const inventory = player.getComponent("minecraft:inventory")?.container;
-            if (!inventory) return;
+    // FLETCHER
+    "minecraft:stick": { cost: 32, reward: 1 },
+    "minecraft:flint": { cost: 10, reward: 1 },
+    "minecraft:string": { cost: 14, reward: 1 },
+    "minecraft:feather": { cost: 12, reward: 1 },
+    "minecraft:tripwire_hook": { cost: 8, reward: 1 },
 
-            // 1. Build a list of available trades based on what is currently in the player's inventory
-            let validTrades = [];
+    // FISHERMAN
+    "minecraft:coal": { cost: 10, reward: 1 },
+    "minecraft:cod": { cost: 10, reward: 1 },
+    "minecraft:salmon": { cost: 10, reward: 1 },
+    "minecraft:tropical_fish": { cost: 6, reward: 1 },
+    "minecraft:pufferfish": { cost: 4, reward: 1 },
 
-            for (const trade of TRADE_REGISTRY) {
-                let totalInputItems = 0;
-                
-                // Count total items matching this specific trade input
-                for (let i = 0; i < inventory.size; i++) {
-                    const item = inventory.getItem(i);
-                    if (item && item.typeId === trade.input) {
-                        totalInputItems += item.amount;
-                    }
-                }
+    // BUTCHER
+    "minecraft:raw_chicken": { cost: 14, reward: 1 },
+    "minecraft:raw_porkchop": { cost: 14, reward: 1 },
+    "minecraft:raw_mutton": { cost: 14, reward: 1 },
+    "minecraft:raw_beef": { cost: 14, reward: 1 },
+    "minecraft:raw_rabbit": { cost: 14, reward: 1 },
+    "minecraft:dried_kelp_block": { cost: 10, reward: 1 },
+    "minecraft:sweet_berries": { cost: 10, reward: 1 },
 
-                // If they have enough to do at least 1 trade, calculate it
-                const possibleTrades = Math.floor(totalInputItems / trade.cost);
-                if (possibleTrades > 0) {
-                    validTrades.push({
-                        ...trade,
-                        possibleTrades: possibleTrades,
-                        totalCost: possibleTrades * trade.cost,
-                        totalReward: possibleTrades * trade.reward
-                    });
-                }
-            }
+    // CLERIC
+    "minecraft:rotten_flesh": { cost: 32, reward: 1 },
+    "minecraft:gold_ingot": { cost: 3, reward: 1 },
+    "minecraft:lapis_lazuli": { cost: 1, reward: 1 },
+    "minecraft:rabbit_foot": { cost: 4, reward: 1 },
+    "minecraft:glowstone_dust": { cost: 4, reward: 1 },
+    "minecraft:scute": { cost: 4, reward: 1 },
+    "minecraft:ender_pearl": { cost: 1, reward: 1 },
 
-            // 2. Build the dynamic Action Form UI
-            const form = new ActionFormData().title("Trade Processor");
+    // ARMORER / TOOLSMITH / WEAPONSMITH
+    "minecraft:coal": { cost: 10, reward: 1 },
+    "minecraft:iron_ingot": { cost: 4, reward: 1 },
+    "minecraft:diamond": { cost: 1, reward: 1 },
 
-            if (validTrades.length === 0) {
-                form.body("Your inventory does not contain any valid trading materials.\n\nRequired:\n- 3x Gold Ingot -> 1x Emerald\n- 4x Iron Ingot -> 1x Emerald\n- 1x Diamond -> 2x Emeralds");
-                form.button("Close", "textures/ui/cross_out");
-            } else {
-                form.body("Select a valid processing route from your inventory below:");
-                for (const trade of validTrades) {
-                    form.button(`Process ${trade.totalCost}x ${trade.displayName}\n[+${trade.totalReward} Emeralds]`, "textures/ui/checkbox");
-                }
-            }
+    // LEATHERWORKER
+    "minecraft:leather": { cost: 6, reward: 1 },
+    "minecraft:rabbit_hide": { cost: 6, reward: 1 },
+    "minecraft:flint": { cost: 10, reward: 1 },
+    "minecraft:scute": { cost: 4, reward: 1 },
 
-            // 3. Handle the form selection response
-            form.show(player).then((response) => {
-                if (response.canceled || validTrades.length === 0) return;
+    // CARTOGRAPHER
+    "minecraft:paper": { cost: 24, reward: 1 },
+    "minecraft:glass_pane": { cost: 16, reward: 1 },
 
-                const selectedTrade = validTrades[response.selection];
-                let remainingCost = selectedTrade.totalCost;
+    // MASON
+    "minecraft:clay_ball": { cost: 10, reward: 1 },
+    "minecraft:stone": { cost: 20, reward: 1 },
+    "minecraft:granite": { cost: 16, reward: 1 },
+    "minecraft:diorite": { cost: 16, reward: 1 },
+    "minecraft:andesite": { cost: 16, reward: 1 },
+    "minecraft:polished_granite": { cost: 12, reward: 1 },
+    "minecraft:polished_diorite": { cost: 12, reward: 1 },
+    "minecraft:polished_andesite": { cost: 12, reward: 1 },
+    "minecraft:dripstone_block": { cost: 12, reward: 1 },
+    "minecraft:quartz": { cost: 12, reward: 1 },
 
-                // Deduct input costs from player inventory slots
-                for (let i = 0; i < inventory.size; i++) {
-                    if (remainingCost <= 0) break;
-                    const item = inventory.getItem(i);
-                    
-                    if (item && item.typeId === selectedTrade.input) {
-                        if (item.amount <= remainingCost) {
-                            remainingCost -= item.amount;
-                            inventory.setItem(i, undefined);
-                        } else {
-                            item.amount -= remainingCost;
-                            inventory.setItem(i, item);
-                            remainingCost = 0;
-                        }
-                    }
-                }
+    // SHEPHERD
+    "minecraft:white_wool": { cost: 16, reward: 1 },
+    "minecraft:light_gray_wool": { cost: 16, reward: 1 },
+    "minecraft:gray_wool": { cost: 16, reward: 1 },
+    "minecraft:black_wool": { cost: 16, reward: 1 },
+    "minecraft:brown_wool": { cost: 16, reward: 1 },
+    "minecraft:red_wool": { cost: 16, reward: 1 },
+    "minecraft:orange_wool": { cost: 16, reward: 1 },
+    "minecraft:yellow_wool": { cost: 16, reward: 1 },
+    "minecraft:lime_wool": { cost: 16, reward: 1 },
+    "minecraft:green_wool": { cost: 16, reward: 1 },
+    "minecraft:cyan_wool": { cost: 16, reward: 1 },
+    "minecraft:light_blue_wool": { cost: 16, reward: 1 },
+    "minecraft:blue_wool": { cost: 16, reward: 1 },
+    "minecraft:purple_wool": { cost: 16, reward: 1 },
+    "minecraft:magenta_wool": { cost: 16, reward: 1 },
+    "minecraft:pink_wool": { cost: 16, reward: 1 },
 
-                // Deliver output rewards
-                player.runCommandAsync(`give @s ${selectedTrade.output} ${selectedTrade.totalReward}`);
-                player.sendMessage(`§a[Trade Processor] Successfully processed ${selectedTrade.possibleTrades} trades for ${selectedTrade.displayName}!`);
-            });
+    // DYES (Shepherd)
+    "minecraft:white_dye": { cost: 12, reward: 1 },
+    "minecraft:light_gray_dye": { cost: 12, reward: 1 },
+    "minecraft:gray_dye": { cost: 12, reward: 1 },
+    "minecraft:black_dye": { cost: 12, reward: 1 },
+    "minecraft:brown_dye": { cost: 12, reward: 1 },
+    "minecraft:red_dye": { cost: 12, reward: 1 },
+    "minecraft:orange_dye": { cost: 12, reward: 1 },
+    "minecraft:yellow_dye": { cost: 12, reward: 1 },
+    "minecraft:lime_dye": { cost: 12, reward: 1 },
+    "minecraft:green_dye": { cost: 12, reward: 1 },
+    "minecraft:cyan_dye": { cost: 12, reward: 1 },
+    "minecraft:light_blue_dye": { cost: 12, reward: 1 },
+    "minecraft:blue_dye": { cost: 12, reward: 1 },
+    "minecraft:purple_dye": { cost: 12, reward: 1 },
+    "minecraft:magenta_dye": { cost: 12, reward: 1 },
+    "minecraft:pink_dye": { cost: 12, reward: 1 },
+
+    // CUSTOM OVERRIDE
+    "minecraft:emerald_block": { cost: 63, reward: 1, rewardItem: "minecraft:diamond" }
+};
+
+world.beforeEvents.worldInitialize.subscribe(init => {
+    init.blockComponentRegistry.registerCustomComponent("cztl:trade_processor", {
+        onPlace(ev) {
+            ev.block.getComponent("minecraft:tick")?.startTick();
+        },
+        onTick(ev) {
+            processTrade(ev.block);
         }
     });
 });
 
+function processTrade(block) {
+    const input = findInputHopper(block);
+    if (!input) return;
 
-// import { world, Container } from "@minecraft/server";
+    const output = findOutputHopper(block);
+    if (!output) return; // ⭐ EXIT EARLY — no hopper below
 
-// world.beforeEvents.worldInitialize.subscribe((initEvent) => {
-//     initEvent.blockComponentRegistry.registerCustomComponent("cztl:trade_processor", {
-        
-//         onPlayerInteract(event) {
-//             const { block, player } = event;
-            
-//             // Get the block's internal inventory component container
-//             const inventoryComponent = block.getComponent("minecraft:inventory");
-//              player.sendMessage("§a[Trade Processor] Right-click detected successfully!");
-//             if (inventoryComponent && inventoryComponent.container) {
-//                 // Force the player's screen to open the block's container view
-//                 player.getComponent("minecraft:inventory")?.container; 
-//                  player.sendMessage("§a[Trade Processor] COntainer detected successfully!");
-//                 // Native command execution to reliably display container screens for custom blocks
-//                 player.runCommandAsync(`container open ${block.location.x} ${block.location.y} ${block.location.z}`);
-//             }
-//         }
-//     });
-// });
+    const inv = input.getComponent("minecraft:inventory")?.container;
+    if (!inv) return;
+
+    processSlot(inv, inv.getItem(0), 0, output);
+    processSlot(inv, inv.getItem(1), 1, output);
+}
+
+function findInputHopper(block) {
+    const { x, y, z } = block.location;
+    const dim = block.dimension;
+
+    const offsets = [
+        { x: 0, y: 1, z: 0 },   // above
+        { x: 1, y: 0, z: 0 },   // east
+        { x: -1, y: 0, z: 0 },  // west
+        { x: 0, y: 0, z: 1 },   // south
+        { x: 0, y: 0, z: -1 }   // north
+    ];
+
+    for (const o of offsets) {
+        const b = dim.getBlock({ x: x + o.x, y: y + o.y, z: z + o.z });
+        if (b?.typeId === "minecraft:hopper") return b;
+    }
+
+    return null;
+}
+
+function findOutputHopper(block) {
+    const { x, y, z } = block.location;
+    const dim = block.dimension;
+
+    const b = dim.getBlock({ x, y: y - 1, z });
+    if (b?.typeId !== "minecraft:hopper") return null;
+
+    return b.getComponent("minecraft:inventory")?.container ?? null;
+}
+
+function processSlot(inv, item, slotIndex, outputInv) {
+    if (!item) return;
+
+    const type = item.typeId;
+
+    // ⭐ FORWARD TRADE
+    if (EXCHANGE_RATES[type]) {
+        const rate = EXCHANGE_RATES[type];
+        const rewardItem = rate.rewardItem ?? "minecraft:emerald";
+
+        if (item.amount >= rate.cost + 1) {
+            const remaining = item.amount - rate.cost;
+            inv.setItem(slotIndex, new ItemStack(type, remaining)); // leave 1
+            outputInv.addItem(new ItemStack(rewardItem, rate.reward)); // ⭐ send to bottom hopper
+            return;
+        }
+    }
+
+    // ⭐ REVERSE TRADE
+    const rewardTypes = new Set(["minecraft:emerald", "minecraft:diamond", "minecraft:emerald_block"]);
+
+    if (rewardTypes.has(type)) {
+        for (const itemId in EXCHANGE_RATES) {
+            const rate = EXCHANGE_RATES[itemId];
+            const rewardItem = rate.rewardItem ?? "minecraft:emerald";
+
+            if (type !== rewardItem) continue;
+
+            if (item.amount >= rate.reward + 1) {
+                const remaining = item.amount - rate.reward;
+                inv.setItem(slotIndex, new ItemStack(type, remaining)); // leave 1
+                outputInv.addItem(new ItemStack(itemId, rate.cost)); // ⭐ send to bottom hopper
+                return;
+            }
+        }
+    }
+}

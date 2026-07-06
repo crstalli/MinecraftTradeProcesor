@@ -4,7 +4,10 @@
     "textures": {
       "up": "trade_processor_top",
       "down": "trade_processor_bottom",
-      "side": "trade_processor_side"
+      "north": "trade_processor_top",
+      "south": "trade_processor_top",
+      "east": "trade_processor_top",
+      "west": "trade_processor_top"
     },
     "sound": "metal"
   }
