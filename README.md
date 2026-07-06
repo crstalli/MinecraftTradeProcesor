@@ -133,108 +133,173 @@ These are example trades that can be represented via slot configuration and inte
 
 ## 📘 Exchange Rates
 
-### 🧑‍🌾 Farmer Trades
-| Output Item              | Cost Item            | Cost Amount | Reward Amount |
-|--------------------------|-----------------------|-------------|---------------|
-| `minecraft:wheat`        | `minecraft:emerald`   | 20          | 1             |
-| `minecraft:potato`       | `minecraft:emerald`   | 15          | 1             |
-| `minecraft:carrot`       | `minecraft:emerald`   | 15          | 1             |
-| `minecraft:beetroot`     | `minecraft:emerald`   | 15          | 1             |
-| `minecraft:pumpkin`      | `minecraft:emerald`   | 6           | 1             |
-| `minecraft:melon_slice`  | `minecraft:emerald`   | 4           | 1             |
-| `minecraft:sweet_berries`| `minecraft:emerald`   | 10          | 1             |
-| `minecraft:nether_wart`  | `minecraft:emerald`   | 12          | 1             |
+
+
+This README lists all villager trades supported by the CZTL Trade Processor.  
+Values match Bedrock Edition and your custom configuration.
 
 ---
 
-### 🏹 Fletcher Trades
-| Output Item              | Cost Item            | Cost Amount | Reward Amount |
-|--------------------------|-----------------------|-------------|---------------|
-| `minecraft:stick`        | `minecraft:emerald`   | 32          | 1             |
-| `minecraft:flint`        | `minecraft:emerald`   | 10          | 1             |
-| `minecraft:string`       | `minecraft:emerald`   | 14          | 1             |
-| `minecraft:feather`      | `minecraft:emerald`   | 12          | 1             |
-| `minecraft:tripwire_hook`| `minecraft:emerald`   | 8           | 1             |
+### 🧑‍🌾 Farmer
+| Item | Cost | Reward |
+|------|------|--------|
+| Wheat | 20 | 1 Emerald |
+| Potato | 26 | 1 Emerald |
+| Carrot | 22 | 1 Emerald |
+| Beetroot | 15 | 1 Emerald |
+| Bread | 2 | 6 Emerald |
+| Pumpkin | 6 | 1 Emerald |
+| Pumpkin Pie | 4 | 4 Emerald |
+| Apple | 4 | 4 Emerald |
+| Melon Slice | 4 | 1 Emerald |
+| Cookie | 3 | 18 Emerald |
+| Suspicious Stew | 1 | 1 Emerald |
+| Cake | 1 | 1 Emerald |
+| Golden Carrot | 3 | 3 Emerald |
+| Glistering Melon Slice | 4 | 3 Emerald |
+| Nether Wart | 22 | 1 Emerald |
 
 ---
 
-### 🎣 Fisherman Trades
-| Output Item              | Cost Item            | Cost Amount | Reward Amount |
-|--------------------------|-----------------------|-------------|---------------|
-| `minecraft:coal`         | `minecraft:emerald`   | 10          | 1             |
-| `minecraft:cod`          | `minecraft:emerald`   | 10          | 1             |
-| `minecraft:salmon`       | `minecraft:emerald`   | 10          | 1             |
-| `minecraft:tropical_fish`| `minecraft:emerald`   | 6           | 1             |
-| `minecraft:pufferfish`   | `minecraft:emerald`   | 4           | 1             |
+### 🏹 Fletcher
+| Item | Cost | Reward |
+|------|------|--------|
+| Stick | 32 | 1 Emerald |
+| Arrow | 1 Emerald | 16 Arrows |
+| Flint | 26 | 1 Emerald |
+| Bow | 2 Emerald | 1 Bow |
+| String | 14 | 1 Emerald |
+| Crossbow | 3 Emerald | 1 Crossbow |
+| Feather | 24 | 1 Emerald |
+| Tripwire Hook | 8 | 1 Emerald |
 
 ---
 
-### 🔪 Butcher Trades
-| Output Item              | Cost Item            | Cost Amount | Reward Amount |
-|--------------------------|-----------------------|-------------|---------------|
-| `minecraft:raw_chicken`  | `minecraft:emerald`   | 14          | 1             |
-| `minecraft:raw_porkchop` | `minecraft:emerald`   | 14          | 1             |
-| `minecraft:raw_mutton`   | `minecraft:emerald`   | 14          | 1             |
-| `minecraft:raw_beef`     | `minecraft:emerald`   | 14          | 1             |
-| `minecraft:raw_rabbit`   | `minecraft:emerald`   | 14          | 1             |
-| `minecraft:dried_kelp_block` | `minecraft:emerald` | 10      | 1             |
-| `minecraft:sweet_berries`| `minecraft:emerald`   | 10          | 1             |
+### 🎣 Fisherman
+| Item | Cost | Reward |
+|------|------|--------|
+| Coal | 10 | 1 Emerald |
+| Cod | 10 | 1 Emerald |
+| Salmon | 10 | 1 Emerald |
+| Tropical Fish | 6 | 1 Emerald |
+| Pufferfish | 4 | 1 Emerald |
+| All Boat Types | 1 | 1 Emerald |
 
 ---
 
-### ✝️ Cleric Trades
-| Output Item              | Cost Item            | Cost Amount | Reward Amount |
-|--------------------------|-----------------------|-------------|---------------|
-| `minecraft:rotten_flesh` | `minecraft:emerald`   | 32          | 1             |
-| `minecraft:gold_ingot`   | `minecraft:emerald`   | 3           | 1             |
-| `minecraft:lapis_lazuli` | `minecraft:emerald`   | 1           | 1             |
-| `minecraft:rabbit_foot`  | `minecraft:emerald`   | 4           | 1             |
-| `minecraft:glowstone_dust`| `minecraft:emerald`  | 4           | 1             |
-| `minecraft:scute`        | `minecraft:emerald`   | 4           | 1             |
-| `minecraft:ender_pearl`  | `minecraft:emerald`   | 1           | 1             |
+### 🍖 Butcher
+| Item | Cost | Reward |
+|------|------|--------|
+| Raw Chicken | 14 | 1 Emerald |
+| Raw Rabbit | 4 | 1 Emerald |
+| Raw Porkchop | 7 | 1 Emerald |
+| Rabbit Stew | 1 | 1 Emerald |
+| Cooked Chicken | 1 Emerald | 8 Cooked Chicken |
+| Cooked Porkchop | 1 Emerald | 5 Cooked Porkchop |
+| Raw Beef | 10 | 1 Emerald |
+| Raw Mutton | 7 | 1 Emerald |
+| Dried Kelp Block | 10 | 1 Emerald |
+| Sweet Berries | 10 | 1 Emerald |
 
 ---
 
-### ⚒️ Armorer / Toolsmith / Weaponsmith Trades
-| Output Item              | Cost Item            | Cost Amount | Reward Amount |
-|--------------------------|-----------------------|-------------|---------------|
-| `minecraft:coal`         | `minecraft:emerald`   | 10          | 1             |
-| `minecraft:iron_ingot`   | `minecraft:emerald`   | 4           | 1             |
-| `minecraft:diamond`      | `minecraft:emerald`   | 1           | 1             |
+### ✝️ Cleric
+| Item | Cost | Reward |
+|------|------|--------|
+| Rotten Flesh | 32 | 1 Emerald |
+| Gold Ingot | 3 | 1 Emerald |
+| Lapis Lazuli | 2 | 1 Emerald |
+| Rabbit Foot | 4 | 1 Emerald |
+| Glowstone Dust | 1 Emerald | 1 Glowstone Dust |
+| Scute | 4 | 1 Emerald |
+| Ender Pearl | 4 Emerald | 1 Ender Pearl |
+| Experience Bottle | 1 Emerald | 3 Bottles |
 
 ---
 
-### 👞 Leatherworker Trades
-| Output Item              | Cost Item            | Cost Amount | Reward Amount |
-|--------------------------|-----------------------|-------------|---------------|
-| `minecraft:leather`      | `minecraft:emerald`   | 6           | 1             |
-| `minecraft:rabbit_hide`  | `minecraft:emerald`   | 6           | 1             |
-| `minecraft:flint`        | `minecraft:emerald`   | 10          | 1             |
-| `minecraft:scute`        | `minecraft:emerald`   | 4           | 1             |
+### ⚒️ Smiths (Armorer / Toolsmith / Weaponsmith)
+| Item | Cost | Reward |
+|------|------|--------|
+| Iron Ingot | 4 | 1 Emerald |
+| Bell | 36 | 1 Emerald |
+| Shield | 5 | 1 Emerald |
+| Iron Armor (full set) | Various | 1 Emerald |
+| Iron Tools | Various | 1 Emerald |
+| Chainmail Armor | Various | 1 Emerald |
 
 ---
 
-### 🗺️ Cartographer Trades
-| Output Item              | Cost Item            | Cost Amount | Reward Amount |
-|--------------------------|-----------------------|-------------|---------------|
-| `minecraft:paper`        | `minecraft:emerald`   | 24          | 1             |
-| `minecraft:glass_pane`   | `minecraft:emerald`   | 16          | 1             |
+### 🐄 Leatherworker
+| Item | Cost | Reward |
+|------|------|--------|
+| Leather | 6 | 1 Emerald |
+| Leather Armor | Various | 1 Emerald |
+| Rabbit Hide | 9 | 1 Emerald |
+| Scute | 4 | 1 Emerald |
+| Leather Horse Armor | 6 | 1 Emerald |
+| Saddle | 6 | 1 Emerald |
 
 ---
 
-### 🧱 Mason Trades
-| Output Item              | Cost Item            | Cost Amount | Reward Amount |
-|--------------------------|-----------------------|-------------|---------------|
-| `minecraft:clay_ball`    | `minecraft:emerald`   | 10          | 1             |
-| `minecraft:stone`        | `minecraft:emerald`   | 20          | 1             |
-| `minecraft:granite`      | `minecraft:emerald`   | 16          | 1             |
-| `minecraft:diorite`      | `minecraft:emerald`   | 16          | 1             |
-| `minecraft:andesite`     | `minecraft:emerald`   | 16          | 1             |
-| `minecraft:polished_granite` | `minecraft:emerald` | 12       | 1             |
-| `minecraft:polished_diorite` | `minecraft:emerald` | 12       | 1             |
-| `minecraft:polished_andesite`| `minecraft:emerald` | 12       | 1             |
-| `minecraft:dripstone_block`  | `minecraft:emerald` | 12       | 1             |
-| `minecraft:quartz`       | `minecraft:emerald`   | 12          | 1             |
+### 🗺️ Cartographer
+| Item | Cost | Reward |
+|------|------|--------|
+| Paper | 24 | 1 Emerald |
+| Glass Pane | 16 | 1 Emerald |
+| Map | 7 | 1 Emerald |
+| Compass | 4 | 1 Emerald |
+| Empty Map | 8 | 1 Emerald |
+| Banner | 3 | 1 Emerald |
+| Woodland Explorer Map | 14 | 1 Emerald |
+| Ocean Explorer Map | 13 | 1 Emerald |
+
+---
+
+### 🧱 Mason
+| Item | Cost | Reward |
+|------|------|--------|
+| Clay Ball | 10 | 1 Emerald |
+| Stone | 20 | 1 Emerald |
+| Granite / Diorite / Andesite | 16 | 1 Emerald |
+| Polished Variants | 12 | 1 Emerald |
+| Dripstone Block | 12 | 1 Emerald |
+| Quartz | 12 | 1 Emerald |
+| Quartz Pillar | 1 | 1 Emerald |
+| Chiseled Quartz Block | 1 | 1 Emerald |
+| Quartz Bricks | 1 | 1 Emerald |
+| Block of Quartz | 1 | 1 Emerald |
+
+---
+
+### 🧶 Shepherd
+| Item | Cost | Reward |
+|------|------|--------|
+| All Wool Colors | 18 | 1 Emerald |
+| All Dye Colors | 1 | 3 Emerald |
+| All Carpet Colors | 1 | 4 Emerald |
+| All Banner Colors | 3 | 1 Emerald |
+| Painting | 2 | 1 Emerald |
+| Shears | 3 | 1 Emerald |
+
+---
+
+### 📚 Librarian
+| Item | Cost | Reward |
+|------|------|--------|
+| Paper | 24 | 1 Emerald |
+| Book | 5 | 1 Emerald |
+| Bookshelf | 9 | 1 Emerald |
+| Lantern | 1 | 1 Emerald |
+| Clock | 3 | 1 Emerald |
+| Compass | 4 | 1 Emerald |
+| Name Tag | 20 | 1 Emerald |
+
+---
+
+### 💎 Custom Trades
+| Item | Cost | Reward |
+|------|------|--------|
+| Emerald Block | 63 | 1 Diamond |
 
 ---
 
@@ -260,8 +325,6 @@ These are example trades that can be represented via slot configuration and inte
 | `minecraft:emerald_block`| `minecraft:diamond`   | 63          | 1             | `minecraft:diamond` |
 
 ---
-
-If you want, I can **insert this directly into your README.md**, or regenerate the entire README with this table included in the correct section.
 
 > Actual behavior depends on how you configure **Slot 1 (output)** and **Slot 2 (cost)** in the input hopper and how your script maps those items.
 
